@@ -3,20 +3,26 @@ public class Grass extends Vegetation {
 
     public Grass(int age, int fuel, int burnRate, double moisture, int density) {
         super(age, fuel, burnRate, moisture);
+        if (density < 0) {
+            throw new IllegalArgumentException("Density cannot be negative");
+        }
         this.density = density;
     }
 
     public int getDensity() {
-        return density;
+        return this.density;
     }
 
     public void setDensity(int density) {
+        if (density < 0) {
+            throw new IllegalArgumentException("Density cannot be negative");
+        }
         this.density = density;
     }
 
     @Override
     public double calculateSpreadHeat(int fireIntensity) {
-        // Calls base calculation from Vegetation and factors in density
-        return calculateSpreadHeat(fireIntensity) + this.density;
+        return super.calculateSpreadHeat(fireIntensity)
+            + Math.min(this.density / 2.0, 5.0);
     }
 }

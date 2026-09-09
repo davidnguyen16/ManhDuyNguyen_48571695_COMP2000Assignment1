@@ -1,4 +1,4 @@
 public abstract class Terrain {
-    public abstract void update();
+    public void update() {
+    }
 }
- 

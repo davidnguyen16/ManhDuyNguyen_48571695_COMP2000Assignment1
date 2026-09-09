@@ -1,68 +1,76 @@
-public abstract class Vegetation extends Terrain implements Burnable{
+public abstract class Vegetation extends Terrain implements Burnable {
     private int age;
     private int fuel;
     private int burnRate;
     private double moisture;
-    private boolean burning;
 
-    public Vegetation(int age, int fuel, int burnRate, double moisture){
+    protected Vegetation(int age, int fuel, int burnRate, double moisture) {
+        if (age < 0 || fuel < 0 || burnRate <= 0) {
+            throw new IllegalArgumentException(
+                "Age and fuel must be non-negative; burn rate must be positive"
+            );
+        }
         this.age = age;
         this.fuel = fuel;
         this.burnRate = burnRate;
+        if (moisture < 0.0 || moisture > 1.0) {
+            throw new IllegalArgumentException("Moisture must be between 0 and 1");
+        }
         this.moisture = moisture;
-        this.burning = false;
     }
 
-    public int getAge(){
-        return age;
+    public int getAge() {
+        return this.age;
     }
 
-    public int getFuel(){
-        return fuel;
+    public int getFuel() {
+        return this.fuel;
     }
 
-    public int getBurnRate(){
-        return burnRate;
+    public int getBurnRate() {
+        return this.burnRate;
     }
 
-    public double getMoisture(){
-        return moisture;
+    public double getMoisture() {
+        return this.moisture;
     }
 
-    public void setMoisture(double moisture){
+    public void setMoisture(double moisture) {
+        if (moisture < 0.0 || moisture > 1.0) {
+            throw new IllegalArgumentException("Moisture must be between 0 and 1");
+        }
         this.moisture = moisture;
     }
 
     @Override
-    public boolean isBurning(){
-        return burning;
-    }
-
-    @Override
-    public void burn (int intensity){
-        if(!burning){
-            return;
+    public void burn(int intensity) {
+        if (intensity <= 0) {
+            throw new IllegalArgumentException("Fire intensity must be positive");
         }
-
-        if(intensity<0){
-            throw new IllegalArgumentException("Fire intensity cannot be negative: " + intensity);
-        }
-
-        int fuelLoss = (int)(intensity * burnRate * (1 - moisture)); //how much fuel is lost after a burn
-        fuel = Math.max(0, fuel - fuelLoss); //remove fuel after its gone
-
-        if(isBurnedOut()){
-            burning = false;
-        }
+        double fuelLoss = Math.ceil(
+            (double) intensity * this.burnRate * (1.0 - this.moisture)
+        );
+        this.fuel = (int) Math.max(0.0, this.fuel - fuelLoss);
     }
 
     @Override
     public boolean isBurnedOut() {
-        return fuel <= 0;
+        return this.fuel == 0;
     }
 
-    public abstract double calculateSpreadHeat(int fireIntensity);
-    public void update(){
-        age++;
+    /** Heat units are model values, not degrees Celsius. */
+    public double calculateSpreadHeat(int fireIntensity) {
+        if (fireIntensity <= 0) {
+            throw new IllegalArgumentException("Fire intensity must be positive");
+        }
+        double ageBonus = Math.min(this.age / 5.0, 10.0);
+        return fireIntensity * 2.0 + ageBonus;
+    }
+
+    @Override
+    public void update() {
+        if (!isBurnedOut() && this.age < Integer.MAX_VALUE) {
+            this.age++;
+        }
     }
 }

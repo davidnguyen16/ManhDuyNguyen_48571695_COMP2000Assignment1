@@ -3,24 +3,32 @@ public class Tree extends Vegetation {
 
     public Tree(int age, int fuel, int burnRate, double moisture, int height) {
         super(age, fuel, burnRate, moisture);
+        if (height < 0) {
+            throw new IllegalArgumentException("Height cannot be negative");
+        }
         this.height = height;
     }
 
     public int getHeight() {
-        return height;
+        return this.height;
     }
 
     @Override
     public double calculateSpreadHeat(int fireIntensity) {
-        // Calls case calculation from Vegetation and adds the height bonus
-        return calculateSpreadHeat(fireIntensity) + this.height;
+        return super.calculateSpreadHeat(fireIntensity)
+            + Math.min(this.height / 2.0, 10.0);
     }
 
     @Override
     public void update() {
-        super.update(); // Increases age via parent update logic
-        if (getAge() % 5 == 0) {
-            this.height++; // Increase height every 5 age units
+        if (isBurnedOut()) {
+            return;
+        }
+        int previousAge = getAge();
+        super.update();
+        if (getAge() != previousAge && getAge() % 5 == 0
+                && this.height < Integer.MAX_VALUE) {
+            this.height++;
         }
     }
 }
