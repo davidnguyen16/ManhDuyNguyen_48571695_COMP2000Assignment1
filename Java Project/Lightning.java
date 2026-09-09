@@ -1,30 +1,47 @@
-public class Lightning extends Weather{
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-	public int strikesPerUpdate;
+public class Lightning extends Weather {
+    private int strikesPerUpdate;
+    private Random random;
 
-	public Lightning(int strength, int duration, int[][] location, int strikesPerUpdate){
-		super(strength, duration, location);
-		this.strikesPerUpdate = strikesPerUpdate;
-	}
+    public Lightning(int strength, int duration, int strikesPerUpdate, Random random) {
+        super(strength, duration);
+        if (strikesPerUpdate < 0 || random == null) {
+            throw new IllegalArgumentException(
+                "Strikes must be non-negative and Random cannot be null"
+            );
+        }
+        this.strikesPerUpdate = strikesPerUpdate;
+        this.random = random;
+    }
 
-	public int getStrikesPerUpdate(){
-		return strikesPerUpdate;
-	}
+    public int getStrikesPerUpdate() {
+        return this.strikesPerUpdate;
+    }
 
-	@Override
-	public void affectSimulation(ForestFireSimulation simulation){
-		for(int i = 0; i < strikesPerUpdate; i++){
-			//Math.random is between 0.0 and 1.0, multipley it by the length of the location array to get a number that will be within the required range.
-			int randomIndex = (int)Math.random() * location.length;
+    @Override
+    protected void affectSimulation(ForestFireSimulation simulation) {
+        Grid<Cell> grid = simulation.getGrid();
+        List<Position> candidates = new ArrayList<Position>();
+        for (int row = 0; row < grid.getRows(); row++) {
+            for (int column = 0; column < grid.getColumns(); column++) {
+                Cell cell = grid.getCell(row, column);
+                if (cell.canBurn() && !cell.isBurning()) {
+                    candidates.add(new Position(row, column));
+                }
+            }
+        }
 
-			//Get a single coordinate value within the specified range.
-			int[] coordinate = location[randomIndex];
-
-			//Get individual row and column info.
-			int row = coordinate[0];
-			int column = coordinate[1];
-
-			simulation.igniteCell(row, column, strength);
-		}		
-	}
+        int count = Math.min(this.strikesPerUpdate, candidates.size());
+        for (int strike = 0; strike < count; strike++) {
+            Position target = candidates.remove(this.random.nextInt(candidates.size()));
+            simulation.addHeat(
+                target.getRow(), target.getColumn(),
+                simulation.getIgnitionThreshold() + getStrength()
+            );
+            simulation.recordLightningStrike(target.getRow(), target.getColumn());
+        }
+    }
 }

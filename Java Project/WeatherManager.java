@@ -1,74 +1,47 @@
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class WeatherManager {
-    ArrayList<Weather> weathers = new ArrayList<>();
-    
-    public boolean isActive(Weather w) {
-        if (w.getDuration() <= 0) {
-            return false;
+    private List<Weather> activeWeatherEffects;
+
+    public WeatherManager() {
+        this.activeWeatherEffects = new ArrayList<Weather>();
+    }
+
+    public void addWeather(Weather weather) {
+        if (weather == null) {
+            throw new IllegalArgumentException("Weather cannot be null");
         }
-
-        return true;
-    }
-
-    public void createWeather(String weather) {
-        Weather w = null;
-
-        switch (weather) {
-            case "Rain":
-                w = new Rain(8, 20, null);
-                break;
-            case "Heatwave":
-                w = new Heatwave(2, 20, null);
-                break;
-            case "Lightning":
-                w = new Lightning(10, 1, null, 3);
-                break;
-            default:
-                break;
+        if (!weather.isActive()) {
+            throw new IllegalArgumentException("Weather must have remaining duration");
         }
-
-        weathers.add(w);
-    }
-
-    public void createWeather(String weather, String selectedDirection) {
-        Weather w = null;
-        int direction = 0;
-
-        switch (selectedDirection) {
-            case "East":
-                direction = 1;
-                break;
-            case "South":
-                direction = 2;
-                break;
-            case "West":
-                direction = 3;
-                break;
-            default:
-                break;
+        if (this.activeWeatherEffects.contains(weather)) {
+            throw new IllegalArgumentException("This weather object is already active");
         }
-
-        w = new Wind(8, 20, null, direction);
-        weathers.add(w);
+        this.activeWeatherEffects.add(weather);
     }
 
-    public void advanceDecrement(Weather w) {
-        w.decrementDuration();
+    public void clearWeather() {
+        this.activeWeatherEffects.clear();
     }
 
+    /** Copies the list structure; the Weather objects themselves are shared. */
+    public List<Weather> getActiveWeatherEffects() {
+        return new ArrayList<Weather>(this.activeWeatherEffects);
+    }
+
+    /** Applies effects in insertion order and safely removes expired ones. */
     public void update(ForestFireSimulation simulation) {
-        Iterator<Weather> it = weathers.iterator();
-
-        while (it.hasNext()) {
-            Weather w = it.next();
-            advanceDecrement(w);
-
-            if (!isActive(w)) {
-                it.remove();
-            } else {
-                w.affectSimulation(simulation);
+        if (simulation == null) {
+            throw new IllegalArgumentException("Simulation cannot be null");
+        }
+        Iterator<Weather> iterator = this.activeWeatherEffects.iterator();
+        while (iterator.hasNext()) {
+            Weather weather = iterator.next();
+            weather.update(simulation);
+            if (!weather.isActive()) {
+                iterator.remove();
             }
         }
     }

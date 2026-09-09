@@ -1,35 +1,39 @@
-//Abstract because it's more a concept than a solid thing.
-public abstract class Weather{
+public abstract class Weather {
+    private int strength;
+    private int duration;
 
-	protected int strength;
-	protected int duration;
-	protected int[][] location;
+    protected Weather(int strength, int duration) {
+        if (strength < 0 || duration < 0) {
+            throw new IllegalArgumentException(
+                "Weather strength and duration cannot be negative"
+            );
+        }
+        this.strength = strength;
+        this.duration = duration;
+    }
 
-	protected Weather(int strength, int duration, int[][] location){
-		if(strength < 0 || duration < 0){
-			throw new IllegalArgumentException("Strength or Duration cannot be negative");
-		}
-		this.strength = strength;
-		this.duration = duration;
-		this.location = location;
-	}
+    public int getStrength() {
+        return this.strength;
+    }
 
-	public int getStrength(){
-		return strength;
-	}
+    public int getDuration() {
+        return this.duration;
+    }
 
-	public int getDuration(){
-		return duration;
-	}
+    public boolean isActive() {
+        return this.duration > 0;
+    }
 
-	public int[][] getLocation(){
-		return location;
-	}
+    public void update(ForestFireSimulation simulation) {
+        if (simulation == null) {
+            throw new IllegalArgumentException("Simulation cannot be null");
+        }
+        if (!isActive()) {
+            return;
+        }
+        affectSimulation(simulation);
+        this.duration--;
+    }
 
-	public void decrementDuration(){
-		duration--;
-	}
-
-	//Public so subclasses can override. Abstract so subclasses have to implement their own specific behaviour.
-	public abstract void affectSimulation(ForestFireSimulation simulation);
+    protected abstract void affectSimulation(ForestFireSimulation simulation);
 }
