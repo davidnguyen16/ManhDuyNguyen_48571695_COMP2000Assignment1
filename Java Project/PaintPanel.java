@@ -55,7 +55,7 @@ public class PaintPanel extends JPanel {
         repaint();
     }
 
-    public Grid.Position getGridPositionAt(int x,int y) {
+    public Position getGridPositionAt(int x,int y) {
 
         if (x < 0 || y < 0) {
             return null;
@@ -70,7 +70,7 @@ public class PaintPanel extends JPanel {
             return null;
         }
 
-        return new Grid.Position(row, column);
+        return new Position(row, column);
     }
 
     @Override

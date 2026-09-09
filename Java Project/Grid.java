@@ -60,6 +60,7 @@ public class Grid<T> {
         cells.get(row).set(column, value);
     }
 
+    /** Reuses the same value in every slot; use separate Cells for mutable terrain. */
     public void fill(T value) {
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {
@@ -115,21 +116,4 @@ public class Grid<T> {
         return positions;
     }
 
-    public static class Position {
-        private int row;
-        private int column;
-
-        public Position(int row, int column) {
-            this.row = row;
-            this.column = column;
-        }
-
-        public int getRow() {
-            return row;
-        }
-
-        public int getColumn() {
-            return column;
-        }
-    }
 }

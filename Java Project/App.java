@@ -299,7 +299,7 @@ public class App {
             return;
         }
 
-        Grid.Position position = this.paintPanel.getGridPositionAt(event.getX(), event.getY());
+        Position position = this.paintPanel.getGridPositionAt(event.getX(), event.getY());
 
         if (position == null) {
             return;

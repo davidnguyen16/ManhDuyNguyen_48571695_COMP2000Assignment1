@@ -177,7 +177,7 @@ public class ForestFireSimulation {
                         vegetation.calculateSpreadHeat(fireIntensity);
                 }
 
-                for (Grid.Position neighbour : this.grid.neighbourPositions(row,column)) {
+                for (Position neighbour : this.grid.neighbourPositions(row,column)) {
 
                     addHeat(neighbour.getRow(), neighbour.getColumn(), spreadHeat);
                 }
@@ -213,7 +213,7 @@ public class ForestFireSimulation {
 
                 removeHeat(row, column, cooling);
 
-                for (Grid.Position neighbour : this.grid.neighbourPositions(row, column)) {
+                for (Position neighbour : this.grid.neighbourPositions(row, column)) {
 
                     removeHeat(neighbour.getRow(), neighbour.getColumn(), cooling / 2.0);
                 }
