@@ -1,25 +1,39 @@
-public class Weather{
+public abstract class Weather {
+    private int strength;
+    private int duration;
 
-//TODO: Decide on strength scale. Suggest no larger than 0 to 5. Perhaps 0 for nothing, 1 for mild, 2 for strong? Then do a switch case to determine which number means what input...
+    protected Weather(int strength, int duration) {
+        if (strength < 0 || duration < 0) {
+            throw new IllegalArgumentException(
+                "Weather strength and duration cannot be negative"
+            );
+        }
+        this.strength = strength;
+        this.duration = duration;
+    }
 
-	public int strength;
-	public int duration;
-	public int[][] location;
+    public int getStrength() {
+        return this.strength;
+    }
 
-	public Weather(int strength, int duration, int[][] location){
-		this.strength = strength;
-		this.duration = duration;
-	}
+    public int getDuration() {
+        return this.duration;
+    }
 
-	public int getstrength(){
-		return strength;
-	}
+    public boolean isActive() {
+        return this.duration > 0;
+    }
 
-	public int getDuration(){
-		return duration;
-	}
+    public void update(ForestFireSimulation simulation) {
+        if (simulation == null) {
+            throw new IllegalArgumentException("Simulation cannot be null");
+        }
+        if (!isActive()) {
+            return;
+        }
+        affectSimulation(simulation);
+        this.duration--;
+    }
 
-	public int[][] getLocation(){
-		return location;
-	}
+    protected abstract void affectSimulation(ForestFireSimulation simulation);
 }
