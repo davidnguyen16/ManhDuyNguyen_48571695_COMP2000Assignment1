@@ -1,20 +1,16 @@
 public class River extends Terrain {
+    private double coolingStrength;
 
-    @Override
-    public void update() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
-    }
-
-    @Override
-    public Terrain clone() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'clone'");
+    public River(double coolingStrength) {
+        if (coolingStrength < 0.0) {
+            throw new IllegalArgumentException(
+                "Cooling strength must be non-negative"
+            );
+        }
+        this.coolingStrength = coolingStrength;
     }
 
     public double getCoolingStrength() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getCoolingStrength'");
+        return this.coolingStrength;
     }
-    
 }
