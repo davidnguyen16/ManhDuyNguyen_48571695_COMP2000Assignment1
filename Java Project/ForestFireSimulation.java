@@ -1,10 +1,13 @@
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ForestFireSimulation {
     private Grid<Cell> grid;
     private Grid<Double> heatMap;
-    private Weather weather;
+    private WeatherManager weatherManager;
     private double ignitionThreshold;
+    private List<Position> lastLightningStrikes;
 
     public ForestFireSimulation(int rows, int columns, Random random) {
         if (random == null) {
@@ -17,27 +20,9 @@ public class ForestFireSimulation {
         this.heatMap = new Grid<Double>(rows, columns);
         this.heatMap.fill(0.0);
 
-        this.weather = null;
+        this.weatherManager = new WeatherManager();
         this.ignitionThreshold = 100.0;
-    }
-
-    private void initializeGrid(Random random) {
-        for (int row = 0; row < this.grid.getRows(); row++) {
-            for (int column = 0; column < this.grid.getColumns(); column++) {
-                int terrainNumber = random.nextInt(100);
-                Terrain terrain;
-
-                if (terrainNumber < 60) {
-                    terrain = new Tree();
-                } else if (terrainNumber < 90) {
-                    terrain = new Grass();
-                } else {
-                    terrain = new River();
-                }
-
-                this.grid.setCell(row, column, new Cell(terrain));
-            }
-        }
+        this.lastLightningStrikes = new ArrayList<Position>();
     }
 
     public Grid<Cell> getGrid() {
@@ -48,12 +33,29 @@ public class ForestFireSimulation {
         return this.heatMap;
     }
 
-    public Weather getWeather() {
-        return this.weather;
+    public void addWeather(Weather weather) {
+        this.weatherManager.addWeather(weather);
     }
 
-    public void setWeather(Weather weather) {
-        this.weather = weather;
+    public void clearWeather() {
+        this.weatherManager.clearWeather();
+        this.lastLightningStrikes.clear();
+    }
+
+    // Keep actual strike positions for one simulation step.
+    public void recordLightningStrike(int row, int column) {
+        if (!this.grid.isInBounds(row, column)) {
+            throw new IndexOutOfBoundsException("Lightning strike outside the grid");
+        }
+        this.lastLightningStrikes.add(new Position(row, column));
+    }
+
+    public List<Position> getLastLightningStrikes() {
+        return new ArrayList<Position>(this.lastLightningStrikes);
+    }
+
+    public List<Weather> getActiveWeatherEffects() {
+        return this.weatherManager.getActiveWeatherEffects();
     }
 
     public double getIgnitionThreshold() {
@@ -71,7 +73,7 @@ public class ForestFireSimulation {
 
         if (cell == null) {
             throw new IllegalStateException(
-                "The selected Grid position has no this Cell coordinate"
+                "The selected Grid position has no Cell"
             );
         }
 
@@ -79,21 +81,25 @@ public class ForestFireSimulation {
     }
 
     public void addHeat(int row, int column, double amount) {
-        if (amount < 0) {
+        if (!Double.isFinite(amount) || amount < 0) {
             throw new IllegalArgumentException(
-                "Heat amount cannot be negative"
+                "Heat amount must be finite and non-negative"
             );
         }
 
         double currentHeat = this.heatMap.getCell(row, column);
 
-        this.heatMap.setCell(row, column, currentHeat + amount);
+        double newHeat = currentHeat + amount;
+        if (!Double.isFinite(newHeat)) {
+            throw new IllegalArgumentException("Resulting heat must be finite");
+        }
+        this.heatMap.setCell(row, column, newHeat);
     }
 
     public void removeHeat(int row, int column, double amount) {
-        if (amount < 0) {
+        if (!Double.isFinite(amount) || amount < 0) {
             throw new IllegalArgumentException(
-                "Heat amount cannot be negative"
+                "Heat amount must be finite and non-negative"
             );
         }
 
@@ -108,12 +114,32 @@ public class ForestFireSimulation {
     }
 
     public void update() {
+        this.lastLightningStrikes.clear();
         spreadFires();
         applyWeather();
         applyRiverCooling();
         updateCells();
         igniteHeatedCells();
         evolveTerrain();
+    }
+
+    private void initializeGrid(Random random) {
+        for (int row = 0; row < this.grid.getRows(); row++) {
+            for (int column = 0; column < this.grid.getColumns(); column++) {
+                int terrainNumber = random.nextInt(100);
+                Terrain terrain;
+
+                if (terrainNumber < 60) {
+                    terrain = new Tree(1, 100, 2, 0.2, 5);
+                } else if (terrainNumber < 90) {
+                    terrain = new Grass(1, 60, 1, 0.1, 10);
+                } else {
+                    terrain = new River(15.0);
+                }
+
+                this.grid.setCell(row, column, new Cell(terrain));
+            }
+        }
     }
 
     private void igniteHeatedCells() {
@@ -186,15 +212,7 @@ public class ForestFireSimulation {
     }
 
     private void applyWeather() {
-        if (this.weather == null) {
-            return;
-        }
-
-        this.weather.affectSimulation(this);
-
-        if (!this.weather.isActive()) {
-            this.weather = null;
-        }
+        this.weatherManager.update(this);
     }
 
     private void applyRiverCooling() {

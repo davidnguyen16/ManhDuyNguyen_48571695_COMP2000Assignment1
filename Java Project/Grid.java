@@ -73,21 +73,6 @@ public class Grid<T> {
         return row >= 0 && row < rows && column >= 0 && column < columns;
     }
 
-    public List<T> neighbours(int row, int column) {
-        List<T> neighbourValues = new ArrayList<T>();
-
-        for (Position position : neighbourPositions(row, column)) {
-            T value = getCell(
-                position.getRow(),
-                position.getColumn()
-            );
-
-            neighbourValues.add(value);
-        }
-
-        return neighbourValues;
-    }
-
     public List<Position> neighbourPositions(int row, int column) {
         if (!isInBounds(row, column)) {
             throw new IndexOutOfBoundsException(
