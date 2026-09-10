@@ -13,7 +13,7 @@ public abstract class Vegetation extends Terrain implements Burnable {
         this.age = age;
         this.fuel = fuel;
         this.burnRate = burnRate;
-        if (moisture < 0.0 || moisture > 1.0) {
+        if (!Double.isFinite(moisture) || moisture < 0.0 || moisture > 1.0) {
             throw new IllegalArgumentException("Moisture must be between 0 and 1");
         }
         this.moisture = moisture;
@@ -35,8 +35,15 @@ public abstract class Vegetation extends Terrain implements Burnable {
         return this.moisture;
     }
 
+    public void setBurnRate(int burnRate) {
+        if (burnRate <= 0) {
+            throw new IllegalArgumentException("Burn rate must be positive");
+        }
+        this.burnRate = burnRate;
+    }
+
     public void setMoisture(double moisture) {
-        if (moisture < 0.0 || moisture > 1.0) {
+        if (!Double.isFinite(moisture) || moisture < 0.0 || moisture > 1.0) {
             throw new IllegalArgumentException("Moisture must be between 0 and 1");
         }
         this.moisture = moisture;
@@ -58,7 +65,6 @@ public abstract class Vegetation extends Terrain implements Burnable {
         return this.fuel == 0;
     }
 
-    /** Heat units are model values, not degrees Celsius. */
     public double calculateSpreadHeat(int fireIntensity) {
         if (fireIntensity <= 0) {
             throw new IllegalArgumentException("Fire intensity must be positive");
