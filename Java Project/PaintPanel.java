@@ -1,12 +1,15 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
+import java.awt.RenderingHints;
 import javax.swing.JPanel;
 
-//@SuppressWarnings({"serial", "this-escape"})
 public class PaintPanel extends JPanel {
     private ForestFireSimulation simulation;
     private int cellSize;
+    private int animationFrame;
 
     public PaintPanel(ForestFireSimulation simulation) {
         if (simulation == null) {
@@ -29,7 +32,7 @@ public class PaintPanel extends JPanel {
 
         setBackground(Color.WHITE);
         setToolTipText(
-            "Click a green cell to start a fire"
+            "Left-click to select and ignite; right-click to select only"
         );
     }
 
@@ -41,6 +44,7 @@ public class PaintPanel extends JPanel {
         }
 
         this.simulation = simulation;
+        this.animationFrame = 0;
 
         Grid<Cell> grid = this.simulation.getGrid();
 
@@ -52,6 +56,12 @@ public class PaintPanel extends JPanel {
         );
 
         revalidate();
+        repaint();
+    }
+
+    // Visual time only: never update heat, fuel or Weather duration here.
+    public void advanceAnimation() {
+        this.animationFrame = (this.animationFrame + 1) % 10000;
         repaint();
     }
 
@@ -73,12 +83,95 @@ public class PaintPanel extends JPanel {
         return new Position(row, column);
     }
 
+    // Set protected access because paintComponent method in JPanel class is protected
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
 
         Grid<Cell> grid = this.simulation.getGrid();
         drawGrid(graphics, grid);
+        drawWeatherEffects(graphics, grid);
+    }
+
+    private void drawWeatherEffects(Graphics graphics, Grid<Cell> grid) {
+        Graphics2D overlay = (Graphics2D) graphics.create();
+        try {
+            int width = grid.getColumns() * this.cellSize;
+            int height = grid.getRows() * this.cellSize;
+            overlay.clipRect(0, 0, width, height);
+            overlay.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON
+            );
+            for (Weather weather : this.simulation.getActiveWeatherEffects()) {
+                if (weather instanceof Rain) {
+                    drawRain(overlay, width, height);
+                } else if (weather instanceof Wind) {
+                    drawWind(overlay, width, height, ((Wind) weather).getDirection());
+                }
+            }
+            // Lightning may already have expired; draw the recorded hits instead.
+            drawLightning(overlay);
+        } finally {
+            overlay.dispose();
+        }
+    }
+
+    private void drawRain(Graphics2D graphics, int width, int height) {
+        graphics.setColor(new Color(120, 210, 255, 200));
+        graphics.setStroke(new BasicStroke(1.5f));
+        int offset = (this.animationFrame * 6) % 36;
+        for (int x = 8; x < width + 10; x += 24) {
+            for (int y = -36; y < height; y += 36) {
+                int dropY = y + offset + (x / 24 % 2) * 18;
+                graphics.drawLine(x, dropY, x - 4, dropY + 12);
+            }
+        }
+    }
+
+    private void drawWind(Graphics2D graphics, int width, int height, int direction) {
+        int dx = 0;
+        int dy = 0;
+        switch (direction) {
+            case 0: dy = -1; break; // North
+            case 1: dx = 1; break;  // East
+            case 2: dy = 1; break;  // South
+            case 3: dx = -1; break; // West
+            default: return;
+        }
+        graphics.setColor(new Color(235, 250, 255, 210));
+        graphics.setStroke(new BasicStroke(2.0f));
+        int offset = (this.animationFrame * 4) % 60;
+        for (int x = -60; x < width + 60; x += 60) {
+            for (int y = -60; y < height + 60; y += 60) {
+                int tipX = x + 6 + dx * offset;
+                int tipY = y + 6 + dy * offset;
+                graphics.drawLine(tipX - dx * 26, tipY - dy * 26, tipX, tipY);
+                graphics.drawLine(tipX, tipY,
+                    tipX - dx * 7 - dy * 5, tipY - dy * 7 + dx * 5);
+                graphics.drawLine(tipX, tipY,
+                    tipX - dx * 7 + dy * 5, tipY - dy * 7 - dx * 5);
+            }
+        }
+    }
+
+    private void drawLightning(Graphics2D graphics) {
+        for (Position strike : this.simulation.getLastLightningStrikes()) {
+            int x = strike.getColumn() * this.cellSize + this.cellSize / 2;
+            int y = strike.getRow() * this.cellSize + this.cellSize / 2;
+            // Short bolts end at the real target, including cells on the top edge.
+            int top = Math.max(0, y - 80);
+            int length = y - top;
+            int[] xs = {x - 8, x + 5, x - 4, x};
+            int[] ys = {top, top + length / 3, top + length * 2 / 3, y};
+            int alpha = this.animationFrame % 6 < 3 ? 230 : 140;
+            graphics.setColor(new Color(255, 225, 60, alpha));
+            graphics.setStroke(new BasicStroke(6.0f));
+            graphics.drawPolyline(xs, ys, xs.length);
+            graphics.drawOval(x - 8, y - 8, 16, 16);
+            graphics.setColor(Color.WHITE);
+            graphics.setStroke(new BasicStroke(2.0f));
+            graphics.drawPolyline(xs, ys, xs.length);
+        }
     }
 
     private void drawGrid(Graphics graphics, Grid<Cell> grid) {
