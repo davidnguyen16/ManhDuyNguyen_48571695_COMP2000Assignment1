@@ -49,7 +49,3 @@ nearby cells.
 - Blue: river
 - Yellow, orange or red: burning cell, from lower to higher intensity
 - Dark grey: burned-out vegetation
-
-Animated overlays show active rain and wind. Lightning bolts show the positions
-struck during the latest simulation update. Heat values are simulation units and
-do not represent degrees Celsius.
