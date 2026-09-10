@@ -8,9 +8,9 @@ public class Lightning extends Weather {
 
     public Lightning(int strength, int duration, int strikesPerUpdate, Random random) {
         super(strength, duration);
-        if (strikesPerUpdate < 0 || random == null) {
+        if (strikesPerUpdate <= 0 || random == null) {
             throw new IllegalArgumentException(
-                "Strikes must be non-negative and Random cannot be null"
+                "Strikes must be positive and Random cannot be null"
             );
         }
         this.strikesPerUpdate = strikesPerUpdate;
