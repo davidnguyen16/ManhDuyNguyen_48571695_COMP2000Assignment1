@@ -32,6 +32,7 @@ public class App {
 
     private JTextField rowsField;
     private JTextField columnsField;
+    private JComboBox<String> mapLayoutBox;
     private JButton startPauseButton;
     private JButton createMapButton;
     private JButton resetMapButton;
@@ -52,7 +53,10 @@ public class App {
     private JButton applyCellChangesButton;
 
     public App() {
-        this.simulation = new ForestFireSimulation(50, 50, new Random(), new RandomMapStrategy());
+        this.mapLayoutBox = new JComboBox<String>(
+                new String[] {"Random","Clustered"});
+        
+        this.simulation = new ForestFireSimulation(50, 50, new Random(), getSelectedMapStrategy());
 
         this.paintPanel = new PaintPanel(this.simulation);
 
@@ -161,6 +165,9 @@ public class App {
 
         mapControlPanel.add(new JLabel("Columns:"));
         mapControlPanel.add(this.columnsField);
+
+        mapControlPanel.add(new JLabel("Layout:"));
+        mapControlPanel.add(this.mapLayoutBox);
 
         mapControlPanel.add(this.createMapButton);
         mapControlPanel.add(this.resetMapButton);
@@ -407,9 +414,19 @@ public class App {
         }
     }
 
+    private MapGenerationStrategy getSelectedMapStrategy() {
+        String layout = (String) this.mapLayoutBox.getSelectedItem();
+        
+        if ("Clustered".equals(layout)) {
+            return new ClusteredMapStrategy();
+        } else {
+            return new RandomMapStrategy();
+        }
+    }
+
     private void replaceMap(int rows, int columns) {
         ForestFireSimulation newSimulation =
-            new ForestFireSimulation(rows, columns, new Random(), new RandomMapStrategy());
+            new ForestFireSimulation(rows, columns, new Random(), getSelectedMapStrategy());
         this.simulation = newSimulation;
         this.paintPanel.setSimulation(newSimulation);
         this.rowsField.setText(Integer.toString(rows));
