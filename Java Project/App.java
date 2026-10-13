@@ -52,7 +52,7 @@ public class App {
     private JButton applyCellChangesButton;
 
     public App() {
-        this.simulation = new ForestFireSimulation(50, 50, new Random());
+        this.simulation = new ForestFireSimulation(50, 50, new Random(), new RandomMapStrategy());
 
         this.paintPanel = new PaintPanel(this.simulation);
 
@@ -409,7 +409,7 @@ public class App {
 
     private void replaceMap(int rows, int columns) {
         ForestFireSimulation newSimulation =
-            new ForestFireSimulation(rows, columns, new Random());
+            new ForestFireSimulation(rows, columns, new Random(), new RandomMapStrategy());
         this.simulation = newSimulation;
         this.paintPanel.setSimulation(newSimulation);
         this.rowsField.setText(Integer.toString(rows));

@@ -9,13 +9,16 @@ public class ForestFireSimulation {
     private double ignitionThreshold;
     private List<Position> lastLightningStrikes;
 
-    public ForestFireSimulation(int rows, int columns, Random random) {
+    public ForestFireSimulation(int rows, int columns, Random random, MapGenerationStrategy mapStrategy) {
         if (random == null) {
             throw new IllegalArgumentException("Random cannot be null");
         }
 
-        this.grid = new Grid<Cell>(rows, columns);
-        initializeGrid(random);
+        if (mapStrategy == null) {
+            throw new IllegalArgumentException("Map strategy cannot be null");
+        }
+
+        this.grid = mapStrategy.generate(rows, columns, random);
 
         this.heatMap = new Grid<Double>(rows, columns);
         this.heatMap.fill(0.0);
@@ -121,25 +124,6 @@ public class ForestFireSimulation {
         updateCells();
         igniteHeatedCells();
         evolveTerrain();
-    }
-
-    private void initializeGrid(Random random) {
-        for (int row = 0; row < this.grid.getRows(); row++) {
-            for (int column = 0; column < this.grid.getColumns(); column++) {
-                int terrainNumber = random.nextInt(100);
-                Terrain terrain;
-
-                if (terrainNumber < 60) {
-                    terrain = new Tree(1, 100, 2, 0.2, 5);
-                } else if (terrainNumber < 90) {
-                    terrain = new Grass(1, 60, 1, 0.1, 10);
-                } else {
-                    terrain = new River(15.0);
-                }
-
-                this.grid.setCell(row, column, new Cell(terrain));
-            }
-        }
     }
 
     private void igniteHeatedCells() {
