@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.LongStream;
+import java.util.stream.Collectors;
 
 public class ExperimentRunner {
     public List<ExperimentResult> runComparison(int rows, int columns, long seeds, int ticks) {
@@ -18,6 +20,17 @@ public class ExperimentRunner {
         results.add(measureTrial("Random", randomSimulation, seeds, ticks, ignitionPosition));
         results.add(measureTrial("Clustered", clusteredSimulation, seeds, ticks, ignitionPosition));
         return results;
+    }
+
+    public List<ExperimentResult> runBatch(int rows, int columns, int seedCount, int ticks) {
+        if (seedCount <= 0) {
+            throw new IllegalArgumentException("Seed count must be positive");
+        }
+
+        return LongStream.range(0, seedCount)
+                .mapToObj(seed -> runComparison(rows, columns, seed, ticks))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
     private Position findCommonTreePosition(Grid<Cell> firstGrid, Grid<Cell> secondGrid) {
