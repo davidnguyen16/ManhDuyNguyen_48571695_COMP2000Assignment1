@@ -30,6 +30,7 @@ public class ExperimentRunner {
         }
 
         return LongStream.range(0, seedCount)
+                .parallel()
                 .mapToObj(seed -> runComparison(rows, columns, seed, ticks))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
