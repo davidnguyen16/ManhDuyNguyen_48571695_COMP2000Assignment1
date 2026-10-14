@@ -3,6 +3,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.LongStream;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.DoubleSummaryStatistics;
 
 public class ExperimentRunner {
     public List<ExperimentResult> runComparison(int rows, int columns, long seeds, int ticks) {
@@ -31,6 +33,14 @@ public class ExperimentRunner {
                 .mapToObj(seed -> runComparison(rows, columns, seed, ticks))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
+    }
+
+    public Map<String, DoubleSummaryStatistics> summarizeResults(List<ExperimentResult> results) {
+        return results.stream()
+                .collect(Collectors.groupingBy(
+                        ExperimentResult::getLayoutName,
+                        Collectors.summarizingDouble(ExperimentResult::getIgnitedPercentage)
+                ));
     }
 
     private Position findCommonTreePosition(Grid<Cell> firstGrid, Grid<Cell> secondGrid) {
