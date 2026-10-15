@@ -44,6 +44,46 @@ public class ExperimentRunner {
                 ));
     }
 
+    public Map<String, Long> countPairwiseOutcomes(List<ExperimentResult> results) {
+        Map<Long, Map<String, Double>> resultsBySeed =
+                results.stream()
+                        .collect(Collectors.groupingBy(
+                                ExperimentResult::getSeed,
+                                Collectors.toMap(
+                                        ExperimentResult::getLayoutName,
+                                        ExperimentResult::getIgnitedPercentage
+                                )
+                        ));
+
+        return resultsBySeed.values().stream()
+                .map(layouts -> {
+                    Double random = layouts.get("Random");
+                    Double clustered = layouts.get("Clustered");
+
+                    if (random == null || clustered == null) {
+                        throw new IllegalArgumentException(
+                                "Each seed must have both layouts"
+                        );
+                    }
+
+                    double difference = random - clustered;
+
+                    if (Math.abs(difference) < 0.01) {
+                        return "Similar";
+                    }
+
+                    if (difference < 0) {
+                        return "Random";
+                    }
+
+                    return "Clustered";
+                })
+                .collect(Collectors.groupingBy(
+                        outcome -> outcome,
+                        Collectors.counting()
+                ));
+    }
+
     private Position findCommonTreePosition(Grid<Cell> firstGrid, Grid<Cell> secondGrid) {
         for (int row = 0; row < firstGrid.getRows(); row++) {
             for (int column = 0; column < firstGrid.getColumns(); column++) {
