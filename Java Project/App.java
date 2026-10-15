@@ -22,6 +22,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
+import java.util.List;
+import java.util.Map;
+import java.util.DoubleSummaryStatistics;
+import java.util.concurrent.ExecutionException;
+import javax.swing.SwingWorker;
 
 public class App {
     private JFrame frame;
@@ -36,6 +41,7 @@ public class App {
     private JButton startPauseButton;
     private JButton createMapButton;
     private JButton resetMapButton;
+    private JButton compareLayoutsButton;
     private JButton applyWeatherButton;
     private JButton clearWeatherButton;
     private JLabel statusLabel;
@@ -73,6 +79,7 @@ public class App {
         this.createMapButton = new JButton("Create New Map");
         this.resetMapButton = new JButton("Reset Map");
         this.resetMapButton.setToolTipText("Generate a new forest with the current map size");
+        this.compareLayoutsButton = new JButton("Compare Layouts");
 
         this.weatherBox = new JComboBox<String>(
                 new String[] {
@@ -172,6 +179,7 @@ public class App {
         mapControlPanel.add(this.createMapButton);
         mapControlPanel.add(this.resetMapButton);
         mapControlPanel.add(this.startPauseButton);
+        mapControlPanel.add(this.compareLayoutsButton);
 
         JPanel weatherControlPanel = new JPanel(new FlowLayout());
 
@@ -297,6 +305,10 @@ public class App {
                     }
                 });
 
+        this.compareLayoutsButton.addActionListener(
+                event -> runLayoutComparison()
+        );
+
         this.weatherBox.addActionListener(
                 new ActionListener() {
                     @Override
@@ -343,6 +355,69 @@ public class App {
                         handleGridClick(event);
                     }
                 });
+    }
+
+    private void runLayoutComparison() {
+        int rows = this.simulation.getGrid().getRows();
+        int columns = this.simulation.getGrid().getColumns();
+        int seedCount = 30;
+        int ticks = 100;
+        this.compareLayoutsButton.setEnabled(false);
+        this.compareLayoutsButton.setText("Comparing...");
+
+        SwingWorker<Map<String, DoubleSummaryStatistics>, Void> worker =
+            new SwingWorker<Map<String, DoubleSummaryStatistics>, Void>() {
+                @Override
+                protected Map<String, DoubleSummaryStatistics> doInBackground() throws Exception {
+                    ExperimentRunner runner = new ExperimentRunner();
+                    List<ExperimentResult> results = runner.runBatch(rows, columns, seedCount, ticks);
+                    return runner.summarizeResults(results);
+                }
+
+                @Override 
+                protected void done() {
+                      try {
+                            Map<String, DoubleSummaryStatistics> summary = get();
+                            String message = String.format(
+                                "Map: %d x %d | Seeds: 0..%d | Ticks: %d\n"
+                                + "Fresh maps, no weather\n\n"
+                                + "Average vegetation ever ignited:\n"
+                                + "Random: %.2f%%\n"
+                                + "Clustered: %.2f%%",
+                                rows, columns, seedCount - 1, ticks,
+                                summary.get("Random").getAverage(),
+                                summary.get("Clustered").getAverage()
+                        );
+
+                        JOptionPane.showMessageDialog(
+                                App.this.frame,
+                                message,
+                                "Layout comparison",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+                    } catch (InterruptedException exception) {
+                        Thread.currentThread().interrupt();
+
+                        JOptionPane.showMessageDialog(
+                                App.this.frame,
+                                "Comparison interrupted.",
+                                "Comparison error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    } catch (ExecutionException exception) {
+                        JOptionPane.showMessageDialog(
+                                App.this.frame,
+                                exception.getCause().getMessage(),
+                                "Comparison error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    } finally {
+                        App.this.compareLayoutsButton.setEnabled(true);
+                        App.this.compareLayoutsButton.setText("Compare Layouts");
+                    }
+                }
+            };
+        worker.execute();
     }
 
     private void toggleSimulation() {
