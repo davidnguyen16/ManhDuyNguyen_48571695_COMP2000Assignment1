@@ -389,6 +389,22 @@ public class App {
                                 summary.get("Clustered").getAverage()
                         );
 
+                        double randomAverage = summary.get("Random").getAverage();
+                        double clusteredAverage = summary.get("Clustered").getAverage();
+                        double difference = Math.abs(randomAverage - clusteredAverage);
+
+                        String conclusion;
+
+                        if (difference < 0.01) {
+                            conclusion = "Average difference is below 0.01 percentage points " + "In this experiement.";
+                        } else if (randomAverage < clusteredAverage) {
+                            conclusion = String.format("Random has a lower average by %.2f percentage points " + "in this experiement.", difference);
+                        } else {
+                            conclusion = String.format("Clustered has a lower average by %.2f percentage points " + "in this experiement.", difference);
+                        }
+
+                        message += "\n\n" + conclusion;
+                        
                         JOptionPane.showMessageDialog(
                                 App.this.frame,
                                 message,
