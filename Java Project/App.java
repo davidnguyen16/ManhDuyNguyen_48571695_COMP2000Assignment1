@@ -365,19 +365,23 @@ public class App {
         this.compareLayoutsButton.setEnabled(false);
         this.compareLayoutsButton.setText("Comparing...");
 
-        SwingWorker<Map<String, DoubleSummaryStatistics>, Void> worker =
-            new SwingWorker<Map<String, DoubleSummaryStatistics>, Void>() {
+        SwingWorker<List<ExperimentResult>, Void> worker =
+            new SwingWorker<List<ExperimentResult>, Void>() {
                 @Override
-                protected Map<String, DoubleSummaryStatistics> doInBackground() throws Exception {
+                protected List<ExperimentResult> doInBackground() {
                     ExperimentRunner runner = new ExperimentRunner();
-                    List<ExperimentResult> results = runner.runBatch(rows, columns, seedCount, ticks);
-                    return runner.summarizeResults(results);
+                    return runner.runBatch(rows, columns, seedCount, ticks);
                 }
 
                 @Override 
                 protected void done() {
                       try {
-                            Map<String, DoubleSummaryStatistics> summary = get();
+                            List<ExperimentResult> results = get();
+                            ExperimentRunner runner = new ExperimentRunner();
+                            Map<String, DoubleSummaryStatistics> summary =
+                                    runner.summarizeResults(results);
+                            Map<String, Long> outcomes =
+                                    runner.countPairwiseOutcomes(results);
                             String message = String.format(
                                 "Map: %d x %d | Seeds: 0..%d | Ticks: %d\n"
                                 + "Fresh maps, no weather\n\n"
@@ -396,14 +400,25 @@ public class App {
                         String conclusion;
 
                         if (difference < 0.01) {
-                            conclusion = "Average difference is below 0.01 percentage points " + "In this experiement.";
+                            conclusion = "Average difference is below 0.01 percentage points " + "in this experiment.";
                         } else if (randomAverage < clusteredAverage) {
-                            conclusion = String.format("Random has a lower average by %.2f percentage points " + "in this experiement.", difference);
+                            conclusion = String.format("Random has a lower average by %.2f percentage points " + "in this experiment.", difference);
                         } else {
-                            conclusion = String.format("Clustered has a lower average by %.2f percentage points " + "in this experiement.", difference);
+                            conclusion = String.format("Clustered has a lower average by %.2f percentage points " + "in this experiment.", difference);
                         }
 
                         message += "\n\n" + conclusion;
+
+                        message += String.format(
+                                "\n\nPaired outcomes (%d seeds):\n"
+                                + "Random lower: %d\n"
+                                + "Clustered lower: %d\n"
+                                + "Similar (<0.01 percentage points): %d",
+                                seedCount,
+                                outcomes.getOrDefault("Random", 0L),
+                                outcomes.getOrDefault("Clustered", 0L),
+                                outcomes.getOrDefault("Similar", 0L)
+                        );
                         
                         JOptionPane.showMessageDialog(
                                 App.this.frame,
