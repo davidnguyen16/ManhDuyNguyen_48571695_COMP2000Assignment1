@@ -33,6 +33,10 @@ public class ForestFireSimulation {
         return this.heatMap;
     }
 
+    public ForestStatistics getStatistics() {
+        return this.grid.stream().collect(ForestStatistics.collector());
+    }
+
     public void addWeather(Weather weather) {
         this.weatherManager.addWeather(weather);
     }

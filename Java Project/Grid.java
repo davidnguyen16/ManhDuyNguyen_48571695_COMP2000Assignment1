@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Grid<T> {
     private int rows;
@@ -34,6 +35,10 @@ public class Grid<T> {
 
     public int getColumns() {
         return columns;
+    }
+
+    public Stream<T> stream() {
+        return this.cells.stream().flatMap(List::stream);
     }
 
     public T getCell(int row, int column) {
