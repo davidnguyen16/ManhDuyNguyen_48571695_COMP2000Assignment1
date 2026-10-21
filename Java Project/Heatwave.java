@@ -1,11 +1,13 @@
+import java.util.stream.IntStream;
+
 public class Heatwave implements WeatherEffectStrategy {
     @Override
     public void apply(ForestFireSimulation simulation, int strength) {
         Grid<Double> heatMap = simulation.getHeatMap();
-        for (int row = 0; row < heatMap.getRows(); row++) {
+        IntStream.range(0, heatMap.getRows()).parallel().forEach(row -> {
             for (int column = 0; column < heatMap.getColumns(); column++) {
                 simulation.addHeat(row, column, strength);
             }
-        }
+        });
     }
 }
