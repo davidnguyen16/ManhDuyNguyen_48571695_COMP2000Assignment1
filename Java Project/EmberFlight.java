@@ -1,6 +1,6 @@
-public final class EmberFlight {
-    private final Position source;
-    private final Position target;
+public class EmberFlight {
+    private Position source;
+    private Position target;
 
     public EmberFlight(int sourceRow, int sourceColumn, int targetRow, int targetColumn) {
         this.source = new Position(sourceRow, sourceColumn);

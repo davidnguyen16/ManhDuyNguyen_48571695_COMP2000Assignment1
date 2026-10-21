@@ -1,9 +1,9 @@
 import java.util.stream.Collector;
 
-public final class ForestStatistics {
-    private final int burningCellCount;
-    private final int burnedOutCellCount;
-    private final long totalFuel;
+public class ForestStatistics {
+    private int burningCellCount;
+    private int burnedOutCellCount;
+    private long totalFuel;
 
     private ForestStatistics(int burningCellCount, int burnedOutCellCount,
             long totalFuel) {

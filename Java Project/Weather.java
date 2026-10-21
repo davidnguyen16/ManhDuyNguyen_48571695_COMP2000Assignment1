@@ -1,7 +1,7 @@
 public class Weather {
     private int strength;
     private int duration;
-    private final WeatherEffectStrategy effect;
+    private WeatherEffectStrategy effect;
 
     public Weather(int strength, int duration, WeatherEffectStrategy effect) {
         if (strength < 0 || duration < 0) {

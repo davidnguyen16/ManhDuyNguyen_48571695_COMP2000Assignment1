@@ -1,6 +1,6 @@
 public class Wind implements WeatherEffectStrategy {
-    private static final int EMBER_DISTANCE = 3;
-    private final int direction;
+    private static int EMBER_DISTANCE = 3;
+    private int direction;
 
     public Wind(int direction) {
         if (direction < 0 || direction > 3) {

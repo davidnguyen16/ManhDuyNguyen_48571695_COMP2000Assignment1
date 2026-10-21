@@ -101,6 +101,6 @@ GUI reads run on Swing's event dispatch thread; worker tasks do not update Swing
 components. This preserves weather order, including rain's zero-heat clamp.
 
 Live statistics use a custom collector with a private accumulator for each stream
-partition and an immutable result. The GUI collects after each complete update;
+partition and a separate result object. The GUI collects after each complete update;
 the collector does not change cells or share one mutable accumulator between
 parallel workers.
