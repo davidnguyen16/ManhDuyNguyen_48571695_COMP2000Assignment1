@@ -38,6 +38,7 @@ public class App {
     private JButton applyWeatherButton;
     private JButton clearWeatherButton;
     private JLabel statusLabel;
+    private JLabel statisticsLabel;
     private JComboBox<String> weatherBox;
     private JComboBox<String> windDirectionBox;
     private JTextField weatherStrengthField;
@@ -65,6 +66,11 @@ public class App {
         this.startPauseButton = new JButton("Pause");
 
         this.statusLabel = new JLabel("Paused - Weather: None");
+        this.statisticsLabel = new JLabel();
+        this.statisticsLabel.setToolTipText(
+            "Trees and grass currently burning, with no fuel, and their total remaining fuel"
+        );
+        updateStatistics();
 
         this.createMapButton = new JButton("Create New Map");
         this.resetMapButton = new JButton("Reset Map");
@@ -210,7 +216,10 @@ public class App {
 
         this.frame.add(mapContainer, BorderLayout.CENTER);
 
-        this.frame.add(this.statusLabel, BorderLayout.SOUTH);
+        JPanel informationPanel = new JPanel(new GridLayout(2, 1));
+        informationPanel.add(this.statisticsLabel);
+        informationPanel.add(this.statusLabel);
+        this.frame.add(informationPanel, BorderLayout.SOUTH);
 
         fitWindowToGrid();
         this.frame.setLocationRelativeTo(null);
@@ -414,6 +423,7 @@ public class App {
         this.columnsField.setText(Integer.toString(columns));
         this.weatherBox.setSelectedItem("Rain");
         clearCellSelection();
+        updateStatistics();
         fitWindowToGrid();
     }
 
@@ -521,6 +531,7 @@ public class App {
                 column,
                 10);
 
+        updateStatistics();
         this.paintPanel.repaint();
 
         this.statusLabel.setText("Fire started at row " + row + ", column " + column);
@@ -668,7 +679,17 @@ public class App {
         updateStatus();
     }
 
+    private void updateStatistics() {
+        ForestStatistics statistics = this.simulation.getStatistics();
+        this.statisticsLabel.setText(
+            "Burning: " + statistics.getBurningCellCount()
+                + " | Out of fuel: " + statistics.getBurnedOutCellCount()
+                + " | Fuel remaining: " + statistics.getTotalFuel()
+        );
+    }
+
     private void updateStatus() {
+        updateStatistics();
         refreshSelectedCellSummary();
         StringBuilder text = new StringBuilder(
             this.timer.isRunning() ? "Running - Weather: " : "Paused - Weather: "
