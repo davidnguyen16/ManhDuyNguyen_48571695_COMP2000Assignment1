@@ -198,7 +198,6 @@ public class App {
 
         JScrollPane scrollPane = new JScrollPane(this.paintPanel);
 
-        // Keep the map at its natural size, even when the controls are wider.
         JPanel mapContainer = new JPanel(new BorderLayout()) {
             @Override
             public void doLayout() {
@@ -222,7 +221,6 @@ public class App {
         Insets border = scrollPane.getInsets();
         int width = gridSize.width + border.left + border.right;
         int height = gridSize.height + border.top + border.bottom;
-        // Leave room for scrollbars when the screen cannot fit the whole grid.
         boolean needsVerticalScroll = container.getHeight() < height;
         boolean needsHorizontalScroll = container.getWidth() < width;
         if (needsVerticalScroll) {

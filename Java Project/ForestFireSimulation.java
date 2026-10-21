@@ -42,7 +42,6 @@ public class ForestFireSimulation {
         this.lastLightningStrikes.clear();
     }
 
-    // Keep actual strike positions for one simulation step.
     public void recordLightningStrike(int row, int column) {
         if (!this.grid.isInBounds(row, column)) {
             throw new IndexOutOfBoundsException("Lightning strike outside the grid");

@@ -1,4 +1,3 @@
-/** A row/column pair; the Grid decides whether it is within its bounds. */
 public class Position {
     private int row;
     private int column;

@@ -1,5 +1,4 @@
 public class Wind extends Weather {
-    // 0 = north, 1 = east, 2 = south, 3 = west.
     private int direction;
 
     public Wind(int strength, int duration, int direction) {

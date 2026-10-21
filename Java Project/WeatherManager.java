@@ -26,12 +26,10 @@ public class WeatherManager {
         this.activeWeatherEffects.clear();
     }
 
-    /** Copies the list structure; the Weather objects themselves are shared. */
     public List<Weather> getActiveWeatherEffects() {
         return new ArrayList<Weather>(this.activeWeatherEffects);
     }
 
-    /** Applies effects in insertion order and safely removes expired ones. */
     public void update(ForestFireSimulation simulation) {
         if (simulation == null) {
             throw new IllegalArgumentException("Simulation cannot be null");

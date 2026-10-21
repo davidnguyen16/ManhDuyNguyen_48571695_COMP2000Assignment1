@@ -17,11 +17,9 @@ public class Grid<T> {
         this.columns = columns;
         this.cells = new ArrayList<List<T>>();
 
-        // Create each row
         for (int row = 0; row < rows; row++) {
             List<T> currentRow = new ArrayList<T>();
 
-            // create columns in rows
             for (int column = 0; column < columns; column++) {
                 currentRow.add(null);
             }
@@ -60,7 +58,6 @@ public class Grid<T> {
         cells.get(row).set(column, value);
     }
 
-    /** Reuses the same value in every slot; use separate Cells for mutable terrain. */
     public void fill(T value) {
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {

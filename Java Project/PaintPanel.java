@@ -59,7 +59,6 @@ public class PaintPanel extends JPanel {
         repaint();
     }
 
-    // Visual time only: never update heat, fuel or Weather duration here.
     public void advanceAnimation() {
         this.animationFrame = (this.animationFrame + 1) % 10000;
         repaint();
@@ -83,7 +82,6 @@ public class PaintPanel extends JPanel {
         return new Position(row, column);
     }
 
-    // Set protected access because paintComponent method in JPanel class is protected
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
@@ -109,7 +107,6 @@ public class PaintPanel extends JPanel {
                     drawWind(overlay, width, height, ((Wind) weather).getDirection());
                 }
             }
-            // Lightning may already have expired; draw the recorded hits instead.
             drawLightning(overlay);
         } finally {
             overlay.dispose();
@@ -132,10 +129,10 @@ public class PaintPanel extends JPanel {
         int dx = 0;
         int dy = 0;
         switch (direction) {
-            case 0: dy = -1; break; // North
-            case 1: dx = 1; break;  // East
-            case 2: dy = 1; break;  // South
-            case 3: dx = -1; break; // West
+            case 0: dy = -1; break;
+            case 1: dx = 1; break;
+            case 2: dy = 1; break;
+            case 3: dx = -1; break;
             default: return;
         }
         graphics.setColor(new Color(235, 250, 255, 210));
@@ -158,7 +155,6 @@ public class PaintPanel extends JPanel {
         for (Position strike : this.simulation.getLastLightningStrikes()) {
             int x = strike.getColumn() * this.cellSize + this.cellSize / 2;
             int y = strike.getRow() * this.cellSize + this.cellSize / 2;
-            // Short bolts end at the real target, including cells on the top edge.
             int top = Math.max(0, y - 80);
             int length = y - top;
             int[] xs = {x - 8, x + 5, x - 4, x};
