@@ -8,6 +8,8 @@ public class ForestFireSimulation {
     private WeatherManager weatherManager;
     private double ignitionThreshold;
     private List<Position> lastLightningStrikes;
+    private boolean flyingEmbersEnabled;
+    private List<EmberFlight> lastEmberFlights;
 
     public ForestFireSimulation(int rows, int columns, Random random) {
         if (random == null) {
@@ -23,6 +25,8 @@ public class ForestFireSimulation {
         this.weatherManager = new WeatherManager();
         this.ignitionThreshold = 100.0;
         this.lastLightningStrikes = new ArrayList<Position>();
+        this.flyingEmbersEnabled = false;
+        this.lastEmberFlights = new ArrayList<EmberFlight>();
     }
 
     public Grid<Cell> getGrid() {
@@ -44,6 +48,33 @@ public class ForestFireSimulation {
     public void clearWeather() {
         this.weatherManager.clearWeather();
         this.lastLightningStrikes.clear();
+        this.lastEmberFlights.clear();
+    }
+
+    public boolean isFlyingEmbersEnabled() {
+        return this.flyingEmbersEnabled;
+    }
+
+    public void setFlyingEmbersEnabled(boolean enabled) {
+        this.flyingEmbersEnabled = enabled;
+        if (!enabled) {
+            this.lastEmberFlights.clear();
+        }
+    }
+
+    public void recordEmberFlight(int sourceRow, int sourceColumn,
+            int targetRow, int targetColumn) {
+        if (!this.grid.isInBounds(sourceRow, sourceColumn)
+                || !this.grid.isInBounds(targetRow, targetColumn)) {
+            throw new IndexOutOfBoundsException("Ember flight outside the grid");
+        }
+        this.lastEmberFlights.add(
+            new EmberFlight(sourceRow, sourceColumn, targetRow, targetColumn)
+        );
+    }
+
+    public List<EmberFlight> getLastEmberFlights() {
+        return new ArrayList<EmberFlight>(this.lastEmberFlights);
     }
 
     public void recordLightningStrike(int row, int column) {
@@ -118,6 +149,7 @@ public class ForestFireSimulation {
 
     public void update() {
         this.lastLightningStrikes.clear();
+        this.lastEmberFlights.clear();
         spreadFires();
         applyWeather();
         applyRiverCooling();

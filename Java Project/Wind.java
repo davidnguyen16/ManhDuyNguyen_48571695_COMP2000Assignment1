@@ -1,4 +1,5 @@
 public class Wind implements WeatherEffectStrategy {
+    private static final int EMBER_DISTANCE = 3;
     private final int direction;
 
     public Wind(int direction) {
@@ -34,6 +35,22 @@ public class Wind implements WeatherEffectStrategy {
                 int targetColumn = column + columnChange;
                 if (grid.isInBounds(targetRow, targetColumn)) {
                     simulation.addHeat(targetRow, targetColumn, strength);
+                }
+
+                if (!simulation.isFlyingEmbersEnabled() || strength <= 0) {
+                    continue;
+                }
+
+                int emberRow = row + rowChange * EMBER_DISTANCE;
+                int emberColumn = column + columnChange * EMBER_DISTANCE;
+                if (!grid.isInBounds(emberRow, emberColumn)) {
+                    continue;
+                }
+
+                Cell targetCell = grid.getCell(emberRow, emberColumn);
+                if (targetCell.canBurn() && !targetCell.isBurning()) {
+                    simulation.addHeat(emberRow, emberColumn, strength);
+                    simulation.recordEmberFlight(row, column, emberRow, emberColumn);
                 }
             }
         }

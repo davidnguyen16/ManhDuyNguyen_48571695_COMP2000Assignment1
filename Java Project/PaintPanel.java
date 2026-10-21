@@ -109,6 +109,7 @@ public class PaintPanel extends JPanel {
                 }
             }
             drawLightning(overlay);
+            drawEmberFlights(overlay);
         } finally {
             overlay.dispose();
         }
@@ -168,6 +169,28 @@ public class PaintPanel extends JPanel {
             graphics.setColor(Color.WHITE);
             graphics.setStroke(new BasicStroke(2.0f));
             graphics.drawPolyline(xs, ys, xs.length);
+        }
+    }
+
+    private void drawEmberFlights(Graphics2D graphics) {
+        double progress = (this.animationFrame % 12) / 11.0;
+        graphics.setStroke(new BasicStroke(2.0f));
+        for (EmberFlight flight : this.simulation.getLastEmberFlights()) {
+            Position source = flight.getSource();
+            Position target = flight.getTarget();
+            int sourceX = source.getColumn() * this.cellSize + this.cellSize / 2;
+            int sourceY = source.getRow() * this.cellSize + this.cellSize / 2;
+            int targetX = target.getColumn() * this.cellSize + this.cellSize / 2;
+            int targetY = target.getRow() * this.cellSize + this.cellSize / 2;
+            int x = (int) Math.round(sourceX + (targetX - sourceX) * progress);
+            int y = (int) Math.round(sourceY + (targetY - sourceY) * progress);
+
+            graphics.setColor(new Color(255, 150, 25, 170));
+            graphics.drawLine(sourceX, sourceY, x, y);
+            graphics.setColor(new Color(255, 100, 0, 240));
+            graphics.fillOval(x - 3, y - 3, 7, 7);
+            graphics.setColor(new Color(255, 240, 140));
+            graphics.fillOval(x - 1, y - 1, 3, 3);
         }
     }
 

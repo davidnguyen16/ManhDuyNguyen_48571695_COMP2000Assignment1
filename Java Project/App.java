@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
 import javax.swing.SwingUtilities;
 
 public class App {
@@ -35,6 +36,7 @@ public class App {
     private JButton startPauseButton;
     private JButton createMapButton;
     private JButton resetMapButton;
+    private JCheckBox flyingEmbersBox;
     private JButton applyWeatherButton;
     private JButton clearWeatherButton;
     private JLabel statusLabel;
@@ -75,6 +77,10 @@ public class App {
         this.createMapButton = new JButton("Create New Map");
         this.resetMapButton = new JButton("Reset Map");
         this.resetMapButton.setToolTipText("Generate a new forest with the current map size");
+        this.flyingEmbersBox = new JCheckBox("Flying embers");
+        this.flyingEmbersBox.setToolTipText(
+            "Wind carries embers three cells downwind. Applies to active wind immediately."
+        );
 
         this.weatherBox = new JComboBox<String>(
                 new String[] {
@@ -171,6 +177,7 @@ public class App {
         mapControlPanel.add(this.createMapButton);
         mapControlPanel.add(this.resetMapButton);
         mapControlPanel.add(this.startPauseButton);
+        mapControlPanel.add(this.flyingEmbersBox);
 
         JPanel weatherControlPanel = new JPanel(new FlowLayout());
 
@@ -297,6 +304,12 @@ public class App {
                     }
                 });
 
+        this.flyingEmbersBox.addActionListener(event -> {
+            this.simulation.setFlyingEmbersEnabled(this.flyingEmbersBox.isSelected());
+            this.paintPanel.repaint();
+            updateStatus();
+        });
+
         this.weatherBox.addActionListener(
                 new ActionListener() {
                     @Override
@@ -417,6 +430,7 @@ public class App {
     private void replaceMap(int rows, int columns) {
         ForestFireSimulation newSimulation =
             new ForestFireSimulation(rows, columns, new Random());
+        newSimulation.setFlyingEmbersEnabled(this.flyingEmbersBox.isSelected());
         this.simulation = newSimulation;
         this.paintPanel.setSimulation(newSimulation);
         this.rowsField.setText(Integer.toString(rows));
@@ -709,6 +723,9 @@ public class App {
                     text.append(" ").append(this.windDirectionBox.getItemAt(
                         ((Wind) effect).getDirection()
                     ));
+                    if (this.simulation.isFlyingEmbersEnabled()) {
+                        text.append(" [embers on]");
+                    }
                 } else if (effect instanceof Lightning) {
                     text.append(" x")
                         .append(((Lightning) effect).getStrikesPerUpdate())
