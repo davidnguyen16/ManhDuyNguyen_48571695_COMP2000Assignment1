@@ -101,10 +101,11 @@ public class PaintPanel extends JPanel {
                 RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON
             );
             for (Weather weather : this.simulation.getActiveWeatherEffects()) {
-                if (weather instanceof Rain) {
+                WeatherEffectStrategy effect = weather.getEffect();
+                if (effect instanceof Rain) {
                     drawRain(overlay, width, height);
-                } else if (weather instanceof Wind) {
-                    drawWind(overlay, width, height, ((Wind) weather).getDirection());
+                } else if (effect instanceof Wind) {
+                    drawWind(overlay, width, height, ((Wind) effect).getDirection());
                 }
             }
             drawLightning(overlay);

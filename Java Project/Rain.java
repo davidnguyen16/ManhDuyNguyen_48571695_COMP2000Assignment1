@@ -1,14 +1,10 @@
-public class Rain extends Weather {
-    public Rain(int strength, int duration) {
-        super(strength, duration);
-    }
-
+public class Rain implements WeatherEffectStrategy {
     @Override
-    protected void affectSimulation(ForestFireSimulation simulation) {
+    public void apply(ForestFireSimulation simulation, int strength) {
         Grid<Double> heatMap = simulation.getHeatMap();
         for (int row = 0; row < heatMap.getRows(); row++) {
             for (int column = 0; column < heatMap.getColumns(); column++) {
-                simulation.removeHeat(row, column, getStrength());
+                simulation.removeHeat(row, column, strength);
             }
         }
     }

@@ -1,15 +1,20 @@
-public abstract class Weather {
+public class Weather {
     private int strength;
     private int duration;
+    private final WeatherEffectStrategy effect;
 
-    protected Weather(int strength, int duration) {
+    public Weather(int strength, int duration, WeatherEffectStrategy effect) {
         if (strength < 0 || duration < 0) {
             throw new IllegalArgumentException(
                 "Weather strength and duration cannot be negative"
             );
         }
+        if (effect == null) {
+            throw new IllegalArgumentException("Weather effect cannot be null");
+        }
         this.strength = strength;
         this.duration = duration;
+        this.effect = effect;
     }
 
     public int getStrength() {
@@ -18,6 +23,10 @@ public abstract class Weather {
 
     public int getDuration() {
         return this.duration;
+    }
+
+    public WeatherEffectStrategy getEffect() {
+        return this.effect;
     }
 
     public boolean isActive() {
@@ -31,9 +40,7 @@ public abstract class Weather {
         if (!isActive()) {
             return;
         }
-        affectSimulation(simulation);
+        this.effect.apply(simulation, this.strength);
         this.duration--;
     }
-
-    protected abstract void affectSimulation(ForestFireSimulation simulation);
 }

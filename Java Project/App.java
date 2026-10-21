@@ -428,33 +428,28 @@ public class App {
                 );
             }
 
-            Weather weather;
+            WeatherEffectStrategy effect;
             switch (selectedWeather) {
                 case "Rain":
-                    weather = new Rain(strength, duration);
+                    effect = new Rain();
                     break;
                 case "Heatwave":
-                    weather = new Heatwave(strength, duration);
+                    effect = new Heatwave();
                     break;
                 case "Lightning":
                     int strikes = Integer.parseInt(
                         this.lightningStrikesField.getText().trim()
                     );
-                    weather = new Lightning(
-                        strength, duration, strikes, new Random()
-                    );
+                    effect = new Lightning(strikes, new Random());
                     break;
                 case "Wind":
-                    weather = new Wind(
-                        strength, duration,
-                        this.windDirectionBox.getSelectedIndex()
-                    );
+                    effect = new Wind(this.windDirectionBox.getSelectedIndex());
                     break;
                 default:
                     throw new IllegalStateException("Unknown Weather selection");
             }
 
-            this.simulation.addWeather(weather);
+            this.simulation.addWeather(new Weather(strength, duration, effect));
         } catch (NumberFormatException exception) {
             JOptionPane.showMessageDialog(
                 this.frame,
@@ -687,14 +682,15 @@ public class App {
                     text.append(", ");
                 }
                 Weather weather = effects.get(index);
-                text.append(weather.getClass().getSimpleName());
-                if (weather instanceof Wind) {
+                WeatherEffectStrategy effect = weather.getEffect();
+                text.append(effect.getClass().getSimpleName());
+                if (effect instanceof Wind) {
                     text.append(" ").append(this.windDirectionBox.getItemAt(
-                        ((Wind) weather).getDirection()
+                        ((Wind) effect).getDirection()
                     ));
-                } else if (weather instanceof Lightning) {
+                } else if (effect instanceof Lightning) {
                     text.append(" x")
-                        .append(((Lightning) weather).getStrikesPerUpdate())
+                        .append(((Lightning) effect).getStrikesPerUpdate())
                         .append("/update");
                 }
                 text.append(" (").append(weather.getDuration()).append(")");

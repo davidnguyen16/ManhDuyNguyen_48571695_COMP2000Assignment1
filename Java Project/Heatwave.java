@@ -1,14 +1,10 @@
-public class Heatwave extends Weather {
-    public Heatwave(int strength, int duration) {
-        super(strength, duration);
-    }
-
+public class Heatwave implements WeatherEffectStrategy {
     @Override
-    protected void affectSimulation(ForestFireSimulation simulation) {
+    public void apply(ForestFireSimulation simulation, int strength) {
         Grid<Double> heatMap = simulation.getHeatMap();
         for (int row = 0; row < heatMap.getRows(); row++) {
             for (int column = 0; column < heatMap.getColumns(); column++) {
-                simulation.addHeat(row, column, getStrength());
+                simulation.addHeat(row, column, strength);
             }
         }
     }

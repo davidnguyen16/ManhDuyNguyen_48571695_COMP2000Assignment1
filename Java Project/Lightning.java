@@ -2,12 +2,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Lightning extends Weather {
+public class Lightning implements WeatherEffectStrategy {
     private int strikesPerUpdate;
     private Random random;
 
-    public Lightning(int strength, int duration, int strikesPerUpdate, Random random) {
-        super(strength, duration);
+    public Lightning(int strikesPerUpdate, Random random) {
         if (strikesPerUpdate <= 0 || random == null) {
             throw new IllegalArgumentException(
                 "Strikes must be positive and Random cannot be null"
@@ -22,7 +21,7 @@ public class Lightning extends Weather {
     }
 
     @Override
-    protected void affectSimulation(ForestFireSimulation simulation) {
+    public void apply(ForestFireSimulation simulation, int strength) {
         Grid<Cell> grid = simulation.getGrid();
         List<Position> candidates = new ArrayList<Position>();
         for (int row = 0; row < grid.getRows(); row++) {
@@ -39,7 +38,7 @@ public class Lightning extends Weather {
             Position target = candidates.remove(this.random.nextInt(candidates.size()));
             simulation.addHeat(
                 target.getRow(), target.getColumn(),
-                simulation.getIgnitionThreshold() + getStrength()
+                simulation.getIgnitionThreshold() + strength
             );
             simulation.recordLightningStrike(target.getRow(), target.getColumn());
         }

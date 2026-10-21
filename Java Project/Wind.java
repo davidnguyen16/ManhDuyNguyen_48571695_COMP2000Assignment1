@@ -1,8 +1,7 @@
-public class Wind extends Weather {
-    private int direction;
+public class Wind implements WeatherEffectStrategy {
+    private final int direction;
 
-    public Wind(int strength, int duration, int direction) {
-        super(strength, duration);
+    public Wind(int direction) {
         if (direction < 0 || direction > 3) {
             throw new IllegalArgumentException("Wind direction must be 0, 1, 2 or 3");
         }
@@ -14,7 +13,7 @@ public class Wind extends Weather {
     }
 
     @Override
-    protected void affectSimulation(ForestFireSimulation simulation) {
+    public void apply(ForestFireSimulation simulation, int strength) {
         int rowChange = 0;
         int columnChange = 0;
         switch (this.direction) {
@@ -34,7 +33,7 @@ public class Wind extends Weather {
                 int targetRow = row + rowChange;
                 int targetColumn = column + columnChange;
                 if (grid.isInBounds(targetRow, targetColumn)) {
-                    simulation.addHeat(targetRow, targetColumn, getStrength());
+                    simulation.addHeat(targetRow, targetColumn, strength);
                 }
             }
         }
